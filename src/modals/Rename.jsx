@@ -1,9 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Modal, FormGroup, FormControl } from 'react-bootstrap';
 
-// BEGIN (write your solution here)
-const Rename = ({ onTaskEdit, onCloseModal, initialTaskText}) => {
-  const [taskText, setTaskText] = useState(initialTaskText);
+const Rename = ({ setTasks, onModalClose, currentTask}) => {
+  const [taskText, setTaskText] = useState(currentTask.val);
 
   const handleInputChange = (e) => {
     setTaskText(e.target.value);
@@ -11,8 +10,15 @@ const Rename = ({ onTaskEdit, onCloseModal, initialTaskText}) => {
 
   const handleFormSubmit = (e) => {
     e.preventDefault();
-    onTaskEdit(taskText);
-    onCloseModal();
+    setTasks((prevVal) => {
+      const taskToEditId = prevVal.findIndex((el) => el.id === currentTask.id);
+      const beforeTask = prevVal.slice(0, taskToEditId);
+      const afterTask = prevVal.slice(taskToEditId + 1);
+      const updatedTasks = beforeTask.concat({ val: taskText, id: currentTask.id }, afterTask);
+      return updatedTasks;
+    });
+
+    onModalClose();
     // setTaskText('');
   };
 
@@ -21,7 +27,7 @@ const Rename = ({ onTaskEdit, onCloseModal, initialTaskText}) => {
       <div className="modal-content">
         <div className="modal-header">
           <div className="modal-title h4">Rename</div>
-          <button onClick={onCloseModal} type="button" className="btn-close" aria-label="Close"></button>
+          <button onClick={onModalClose} type="button" className="btn-close" aria-label="Close"></button>
         </div>
         <div className="modal-body">
           <form onSubmit={(e) => handleFormSubmit(e)}>

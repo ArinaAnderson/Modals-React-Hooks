@@ -1,69 +1,48 @@
 import React, { useState } from 'react';
 import { useImmer } from 'use-immer';
+import getModal from './modals/index.js';
 import Add from './modals/Add.jsx';
 import Remove from './modals/Remove.jsx';
 import Rename from './modals/Rename.jsx';
 
-// BEGIN (write your solution here)
 const App = () => {
   const [tasks, setTasks] = useState([]);
   const [showModal, setShowModal] = useState(null);
-  const [currentTaskId, setCurrentTaskId] = useState(null);
-  const [currentTaskVal, setCurrentTaskVal] = useState(null);
+  const [currentTask, setCurrentTask] = useState(null);
 
-  const handleOpenModal = (modalType) => {
+  const [currentTaskId, setCurrentTaskId] = useState(null);
+
+  const handleModalOpen = (modalType) => {
     setShowModal(modalType);
   };
 
-  const handleCloseModal = () => {
+  const handleModalClose = () => {
     setShowModal(null);
   };
 
-  const handleAddTask = (task) => {
-    console.log(JSON.stringify(task, null, '  '));
-    setTasks((prevVal) => ([...prevVal, task]));
+  const hadnleRemoveTaskBtnClick = (task) => {
+    setCurrentTask(task);
+    handleModalOpen('removing');
   };
 
-  const handleRemoveTask = () => { // for modal formsubmit
-    const filteredTasks = tasks.filter((task) => task.id !== currentTaskId);
-    setTasks(filteredTasks);
+  const hadnleEditTaskBtnClick = (task) => {
+    setCurrentTask(task);
+    handleModalOpen('renaming');
   };
 
-  const handleEditTask = (taskText) => {
-    console.log('CURRENTTASKID', currentTaskId);
-    const taskToEditId = tasks.findIndex((el) => el.id === currentTaskId);
-    console.log('EDIT TASK', taskToEditId);
-    console.log('TASK EDITED', { val: taskText, id: currentTaskId })
-    const beforeTask = tasks.slice(0, taskToEditId);
-    const afterTask = tasks.slice(taskToEditId + 1);
-    const updatedTasks = beforeTask.concat({ val: taskText, id: currentTaskId }, afterTask);
-    setTasks(updatedTasks);
-  };
-
-  const hadnleRemoveTaskBtnClick = (taskId) => {
-    setCurrentTaskId(taskId);
-    handleOpenModal('removing');
-  };
-
-  const hadnleEditTaskBtnClick = (taskId, taskVal) => {
-    setCurrentTaskId(taskId);
-    setCurrentTaskVal(taskVal);
-    handleOpenModal('renaming');
-  };
-
-  const renderTask = ({ val, id }) => {
+  const renderTask = (task) => {
     return (
-      <div key={id}>
-        <span className="mr-3">{val}</span>
+      <div key={task.id}>
+        <span className="mr-3">{task.val}</span>
         <button
-          onClick={() => hadnleEditTaskBtnClick(id, val)}
+          onClick={() => hadnleEditTaskBtnClick(task)}
           type="button"
           className="border-0 btn btn-link mr-3 text-decoration-none"
           data-testid="item-rename">
             rename
           </button>
         <button
-          onClick={() => hadnleRemoveTaskBtnClick(id)}
+          onClick={() => hadnleRemoveTaskBtnClick(task)}
           type="button"
           className="border-0 btn btn-link text-decoration-none"
           data-testid="item-remove">
@@ -77,22 +56,30 @@ const App = () => {
     if (!modalType) {
       return null;
     }
+
+    const Component = getModal(modalType);
+    return <Component setTasks={setTasks} onModalClose={handleModalClose} currentTask={currentTask} />;
+    /*
     switch (modalType) {
       case 'adding':
-        return <Add onTaskSubmit={handleAddTask} onCloseModal={handleCloseModal} />;
+        const Component = getModal(modalType);
+        console.log('COMPONENT',<Component />)
+        return <Component onTaskSubmit={handleAddTask} onCloseModal={handleModalClose} />;
+        // return <Add onTaskSubmit={handleAddTask} onCloseModal={handleModalClose} />;
       case 'removing':
-        return <Remove onTaskRemove={handleRemoveTask} onCloseModal={handleCloseModal} />;
+        return <Remove onTaskRemove={handleRemoveTask} onCloseModal={handleModalClose} />;
       case 'renaming':
-        return <Rename onTaskEdit={handleEditTask} onCloseModal={handleCloseModal} initialTaskText={currentTaskVal} />;
+        return <Rename onTaskEdit={handleEditTask} onCloseModal={handleModalClose} initialTaskText={currentTaskVal} />;
       default:
         throw new Error('unkbnown modal type');
     }
+    */
   };
 
   return (
     <>
       <div className="mb-3">
-        <button onClick={() => handleOpenModal('adding')} type="button" data-testid="item-add" className="btn btn-secondary">add</button>
+        <button onClick={() => handleModalOpen('adding')} type="button" data-testid="item-add" className="btn btn-secondary">add</button>
       </div>
       {tasks.map((task) => renderTask(task))}
       {renderModal(showModal)}

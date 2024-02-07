@@ -2,26 +2,26 @@ import React, { useEffect, useState, useRef } from 'react';
 import _ from 'lodash';
 import { Modal, FormGroup, FormControl } from 'react-bootstrap';
 
-// BEGIN (write your solution here)
-const Add = ({ onTaskSubmit, onCloseModal }) => {
+const Add = ({ setTasks, onModalClose, currentTask }) => {
   const [taskText, setTaskText] = useState();
 
   const handleInputChange = (e) => {
     setTaskText(e.target.value);
   };
-  
+
   const handleFormSubmit = (e) => {
     e.preventDefault();
-    onTaskSubmit({ val: taskText, id: _.uniqueId()});
-    onCloseModal();
+    setTasks((prevVal) => ([...prevVal, { val: taskText, id: _.uniqueId() }]));
+    onModalClose();
     setTaskText('');
   };
+
   return (
     <div className="modal-dialog">
       <div className="modal-content">
         <div className="modal-header">
           <div className="modal-title h4">Add</div>
-          <button onClick={onCloseModal} type="button" className="btn-close" aria-label="Close"></button>
+          <button type="button" className="btn-close" aria-label="Close" onClick={onModalClose}></button>
         </div>
         <div className="modal-body">
           <form onSubmit={(e) => handleFormSubmit(e)}>
